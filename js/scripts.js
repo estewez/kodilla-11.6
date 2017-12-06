@@ -1,6 +1,8 @@
+var numberOfBoards = 1;
 var kanban = {
     name: 'kanban container',
     addBoard: function(board) {
+        numberOfBoards++;
         this.$element.append(board.$element);
     },
     $element: $('#kanban .board-container')
@@ -14,38 +16,45 @@ $(function() {
     });
 })
 
+
+
 function Board(boardName) {
     var self = this;
     this.id = randomString();
     this.name = boardName;
+    this.boardNumber = numberOfBoards;
+    this.$columnContainer = $('<div>').addClass('column-container ' + this.boardNumber);
     this.$element = createBoard();
 
     function createBoard() {
-        var $board = $('<div>').addClass('board clearfix');
+        var $board = $('<div>').addClass('board');
         var $boardTitle = $('<h1>').addClass('board-title').text(self.name);
         var $boardAddColumn = $('<button>').addClass('btn create-column').text('Create a column');
         var $boardDelete = $('<button>').addClass('btn-delete').text('X');
-        var $columnContainer = $('<div>').addClass('column-container');
         $boardDelete.click(function() {
             self.removeBoard();
         });
         $boardAddColumn.click(function(event) {
-            self.addColumn(new Column(prompt("Enter the name of the column")));
+            if ($('.column-container.' + self.boardNumber + ' .column').length < 6) {
+                self.addColumn(new Column(prompt("Enter the name of the column")));
+            } else {
+                alert('Max number of columns reached!')
+            }
         });
         $board.append($boardTitle)
             .append($boardAddColumn)
             .append($boardDelete)
-            .append($columnContainer);
+            .append(self.$columnContainer);
         return $board;
     }
 }
 Board.prototype = {
     addColumn: function(column) {
-        this.$element.append(column.$element);
+        this.$columnContainer.append(column.$element);
         initSortable();
     },
     removeBoard: function() {
-      this.$element.remove();
+        this.$element.remove();
     }
 };
 
@@ -76,10 +85,10 @@ function Column(name) {
 }
 Column.prototype = {
     addCard: function(card) {
-      this.$element.children('ul').append(card.$element);
+        this.$element.children('ul').append(card.$element);
     },
     removeColumn: function() {
-      this.$element.remove();
+        this.$element.remove();
     }
 };
 
